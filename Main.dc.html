@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Instagram-Style Platform System Design</title>
+<script src="./vendor/react.js"></script>
+<script src="./vendor/react-dom.js"></script>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap">
+<style>
+body{margin:0}
+button{font-family:inherit;cursor:pointer}
+@media print{.noprint{display:none !important}}
+</style>
+</helmet>
+<div style="{{root}}">
+<header class="noprint" style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:14px 28px;background:var(--card);border-bottom:1px solid var(--line)">
+<div style="font-weight:800;font-size:18px;background:linear-gradient(135deg,#7c3aed,#db2777,#2563eb);-webkit-background-clip:text;background-clip:text;color:transparent;margin-right:12px">PhotoGram Design</div>
+<nav style="display:flex;flex-wrap:wrap;gap:6px;flex:1">
+<sc-for list="{{tabs}}" as="t" hint-placeholder-count="6">
+<button onClick="{{t.go}}" style="{{t.st}}">{{t.label}}</button>
+</sc-for>
+</nav>
+<button onClick="{{print}}" style="padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--text);font-weight:600;font-size:13px">Print / PDF</button>
+<button onClick="{{toggleDark}}" aria-label="Toggle dark mode" style="padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--text);font-weight:600;font-size:13px">{{modeLabel}}</button>
+</header>
+<main style="max-width:1180px;margin:0 auto;padding:32px 24px 64px;display:flex;flex-direction:column;gap:28px">
+
+<sc-if value="{{isHome}}" hint-placeholder-val="{{ true }}">
+<section style="border-radius:24px;padding:48px 40px;color:#fff;background:linear-gradient(135deg,#6d28d9,#be185d 55%,#1d4ed8)">
+<div style="font-size:13px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;opacity:.9">System Design · LLD + HLD</div>
+<h1 style="margin:10px 0 12px;font-size:44px;line-height:1.1;font-weight:800">Instagram-Style Photo &amp; Short Video Platform</h1>
+<p style="margin:0 0 24px;max-width:680px;font-size:17px;line-height:1.6">A scalable architecture for uploading photos and short videos, publishing posts, following users, liking, commenting and viewing personalized feeds for millions of users.</p>
+<div style="display:flex;flex-wrap:wrap;gap:12px">
+<button onClick="{{goLld}}" style="padding:12px 24px;border-radius:999px;border:0;background:#fff;color:#4c1d95;font-weight:800;font-size:15px">Explore LLD</button>
+<button onClick="{{goHld}}" style="padding:12px 24px;border-radius:999px;border:2px solid #fff;background:transparent;color:#fff;font-weight:800;font-size:15px">Explore HLD</button>
+</div>
+</section>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px">
+<div style="{{card}}"><h2 style="{{h2}}">Problem statement</h2><p style="{{p}}">Design a scalable system that allows users to upload photos and short videos, create posts, follow users, like posts, comment, and view personalized feeds.</p></div>
+<div style="{{card}}"><h2 style="{{h2}}">Functional requirements</h2><p style="{{p}}">Upload and validate media · Create and view posts · Follow and unfollow · Like and comment · Personalized feed · Push notifications</p></div>
+<div style="{{card}}"><h2 style="{{h2}}">Non-functional requirements</h2><p style="{{p}}">Millions of users · Read-heavy traffic (feed reads far outnumber uploads) · Low-latency media delivery · High availability · Eventual consistency for counters and feeds</p></div>
+</div>
+<div style="{{card}}"><h2 style="{{h2}}">What is inside</h2>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:12px">
+<sc-for list="{{tabs}}" as="t" hint-placeholder-count="5">
+<button onClick="{{t.go}}" style="text-align:left;padding:16px;border-radius:14px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-weight:600;font-size:14px">{{t.label}}<div style="font-weight:400;color:var(--mute);margin-top:4px;font-size:13px">{{t.desc}}</div></button>
+</sc-for>
+</div></div>
+</sc-if>
+
+<sc-if value="{{isApi}}" hint-placeholder-val="{{ false }}">
+<section style="display:flex;flex-direction:column;gap:16px">
+<div><h1 style="{{h1}}">REST API Documentation</h1><p style="{{p}}">Expand an endpoint to see request/response JSON and status codes. All endpoints require <code style="font-family:'JetBrains Mono',monospace">Authorization: Bearer &lt;JWT&gt;</code>.</p></div>
+<sc-for list="{{apis}}" as="a" hint-placeholder-count="6">
+<div style="{{card}}">
+<button onClick="{{a.toggle}}" style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;width:100%;background:transparent;border:0;padding:0;color:var(--text);text-align:left;font-size:15px">
+<span style="{{a.badge}}">{{a.method}}</span>
+<span style="font-family:'JetBrains Mono',monospace;font-weight:600">{{a.path}}</span>
+<span style="color:var(--mute);flex:1">{{a.title}}</span>
+<span style="font-weight:600">{{a.arrow}}</span>
+</button>
+<sc-if value="{{a.open}}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:16px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;flex-wrap:wrap;gap:8px"><button onClick="{{a.copyPath}}" style="{{btn}}">Copy endpoint</button><button onClick="{{a.copyReq}}" style="{{btn}}">Copy request</button><button onClick="{{a.copyRes}}" style="{{btn}}">Copy response</button></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px">
+<div><div style="{{lbl}}">Request</div><pre style="{{pre}}">{{a.req}}</pre></div>
+<div><div style="{{lbl}}">Response</div><pre style="{{pre}}">{{a.res}}</pre></div>
+</div>
+<div style="{{p}}"><b>Status codes:</b> {{a.codes}}</div>
+</div>
+</sc-if>
+</div>
+</sc-for>
+</section>
+</sc-if>
+
+<sc-if value="{{isLld}}" hint-placeholder-val="{{ false }}">
+<section style="display:flex;flex-direction:column;gap:20px">
+<div><h1 style="{{h1}}">Low-Level Design</h1><p style="{{p}}">Sequence flow for media upload and the UML class model. Endpoint details are under API Docs; tables are under Database.</p></div>
+<div style="{{card}}">
+<h2 style="{{h2}}">Sequence diagram: upload and publish</h2>
+<div style="overflow-x:auto;margin-top:12px"><div style="min-width:820px">
+<div style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0">
+<sc-for list="{{actors}}" as="x" hint-placeholder-count="6"><div style="margin:0 6px;padding:10px 6px;text-align:center;border-radius:10px;color:#fff;font-weight:600;font-size:13px;background:{{x.c}}">{{x.name}}</div></sc-for>
+</div>
+<sc-for list="{{steps}}" as="s" hint-placeholder-count="10">
+<div style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));align-items:center;padding:8px 0;border-bottom:1px dashed var(--line)">
+<div style="{{s.gc}}"><div style="{{s.mg}}"><div style="font-size:12px;text-align:center;margin-bottom:3px;color:var(--text)"><b>{{s.n}}.</b> {{s.label}}</div>
+<div style="{{s.line}}"><div style="flex:1;height:2px;background:{{s.col}}"></div><span style="color:{{s.col}};font-size:11px">{{s.head}}</span></div></div></div>
+</div>
+</sc-for>
+</div></div>
+<p style="{{p}}"><b>Phases:</b> steps 2-3 authenticate · 4 media validation · 5-6 upload · 7-8 metadata storage · 9-10 post publication. Transcoding and thumbnails run later in background workers.</p>
+</div>
+<div style="{{card}}">
+<h2 style="{{h2}}">UML class diagram</h2>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:12px">
+<sc-for list="{{classes}}" as="k" hint-placeholder-count="5">
+<div style="border:2px solid #7c3aed;border-radius:10px;overflow:hidden;background:var(--bg)">
+<div style="background:linear-gradient(135deg,#7c3aed,#db2777);color:#fff;font-weight:800;padding:8px 12px;text-align:center">{{k.name}}</div>
+<pre style="{{umlPre}}">{{k.attrs}}</pre>
+<pre style="{{umlPre}};border-top:1px solid var(--line)">{{k.methods}}</pre>
+</div>
+</sc-for>
+</div>
+<div style="margin-top:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px">
+<sc-for list="{{rels}}" as="r" hint-placeholder-count="6"><div style="padding:10px 12px;border-radius:10px;background:var(--bg);border:1px solid var(--line);font-size:13px;color:var(--text)"><b>{{r.a}}</b> <span style="color:#db2777;font-family:'JetBrains Mono',monospace">{{r.m}}</span> <b>{{r.b}}</b><div style="color:var(--mute)">{{r.t}}</div></div></sc-for>
+</div></div>
+</section>
+</sc-if>
+
+<sc-if value="{{isDb}}" hint-placeholder-val="{{ false }}">
+<section style="display:flex;flex-direction:column;gap:20px">
+<div><h1 style="{{h1}}">Database Design (PostgreSQL)</h1><p style="{{p}}"><span style="color:#7c3aed;font-weight:800">PK</span> primary key · <span style="color:#db2777;font-weight:800">FK</span> foreign key · <span style="color:#2563eb;font-weight:800">UQ</span> unique.</p></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px">
+<sc-for list="{{tables}}" as="t" hint-placeholder-count="6">
+<div style="border:2px solid #2563eb;border-radius:12px;overflow:hidden;background:var(--card)">
+<div style="background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;font-weight:800;padding:8px 12px">{{t.name}}</div>
+<pre style="{{umlPre}}">{{t.cols}}</pre>
+</div>
+</sc-for>
+</div>
+<div style="{{card}}"><h2 style="{{h2}}">ER relationships</h2>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:8px;margin-top:12px">
+<sc-for list="{{erRels}}" as="r" hint-placeholder-count="8"><div style="padding:10px 12px;border-radius:10px;background:var(--bg);border:1px solid var(--line);font-size:13px;color:var(--text)"><b>{{r.a}}</b> <span style="color:#db2777;font-family:'JetBrains Mono',monospace">{{r.m}}</span> <b>{{r.b}}</b><div style="color:var(--mute)">{{r.t}}</div></div></sc-for>
+</div></div>
+<div style="{{card}}"><h2 style="{{h2}}">Indexes</h2><p style="{{p}}">posts(user_id, created_at DESC) for profile and feed fan-in · followers(followee_id) and followers(follower_id) · likes(post_id) with UQ(post_id, user_id) · comments(post_id, created_at) · media(post_id).</p></div>
+</section>
+</sc-if>
+
+<sc-if value="{{isHld}}" hint-placeholder-val="{{ false }}">
+<section style="display:flex;flex-direction:column;gap:20px">
+<div><h1 style="{{h1}}">High-Level Design</h1><p style="{{p}}">Select any component to see its responsibility and what it talks to.</p></div>
+<div style="{{card}}">
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+<sc-for list="{{edge}}" as="e" hint-placeholder-count="3">
+<button onClick="{{e.pick}}" style="{{e.st}}">{{e.name}}</button>
+<div style="color:var(--mute);font-size:12px;font-weight:600">↓ {{e.arrow}}</div>
+</sc-for>
+<div style="width:100%;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px">
+<sc-for list="{{services}}" as="e" hint-placeholder-count="6"><button onClick="{{e.pick}}" style="{{e.st}}">{{e.name}}</button></sc-for>
+</div>
+<div style="color:var(--mute);font-size:12px;font-weight:600;text-align:center">↓ SQL reads/writes · cache lookups · publish events · store/fetch media ↓</div>
+<div style="width:100%;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px">
+<sc-for list="{{infra}}" as="e" hint-placeholder-count="6"><button onClick="{{e.pick}}" style="{{e.st}}">{{e.name}}</button></sc-for>
+</div>
+<div style="color:var(--mute);font-size:12px;font-weight:600;text-align:center">Kafka → Workers → Object Storage → CDN → Client (media delivery path)</div>
+</div>
+<div style="margin-top:18px;padding:16px;border-radius:14px;background:var(--bg);border:1px solid var(--line)"><div style="font-weight:800;color:var(--text)">{{sel.name}}</div><p style="{{p}}">{{sel.desc}}</p></div>
+<div style="display:flex;flex-wrap:wrap;gap:16px;margin-top:14px;font-size:12px;color:var(--mute)"><span><b style="color:#7c3aed">Purple</b> clients and edge</span><span><b style="color:#db2777">Pink</b> services</span><span><b style="color:#2563eb">Blue</b> data and infrastructure</span></div>
+</div>
+</section>
+</sc-if>
+
+<sc-if value="{{isScale}}" hint-placeholder-val="{{ false }}">
+<section style="display:flex;flex-direction:column;gap:16px">
+<div><h1 style="{{h1}}">Scalability and Reliability</h1><p style="{{p}}">Millions of users are served by keeping every tier stateless and horizontally scalable, absorbing reads with caches and the CDN, and moving heavy work off the request path.</p></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;align-items:start">
+<sc-for list="{{scale}}" as="c" hint-placeholder-count="8">
+<div style="{{card}}"><button onClick="{{c.toggle}}" style="display:flex;justify-content:space-between;width:100%;background:transparent;border:0;padding:0;color:var(--text);font-weight:800;font-size:16px;text-align:left"><span>{{c.title}}</span><span>{{c.arrow}}</span></button>
+<p style="{{p}}">{{c.short}}</p>
+<sc-if value="{{c.open}}" hint-placeholder-val="{{ false }}"><p style="{{p}};padding-top:10px;border-top:1px solid var(--line)">{{c.more}}</p></sc-if></div>
+</sc-for>
+</div>
+</section>
+</sc-if>
+
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1500}}'>
+class Component extends DCLogic {
+  state = { tab: 'home', dark: false, open: {}, sel: 'gw' };
+  renderVals() {
+    const s = this.state, go = (t) => () => this.setState({ tab: t });
+    const tg = (id) => () => this.setState({ open: { ...s.open, [id]: !s.open[id] } });
+    const cp = (t) => () => { try { navigator.clipboard.writeText(t); } catch (e) {} };
+    const th = s.dark
+      ? '--bg:#12101c;--card:#1c1930;--text:#f3f0ff;--mute:#b2abd0;--line:#342f52'
+      : '--bg:#faf7ff;--card:#ffffff;--text:#1e1b2e;--mute:#5b5675;--line:#e6def5';
+    const tabs = [
+      { id: 'home', label: 'Home', desc: 'Problem, requirements, features' },
+      { id: 'lld', label: 'LLD', desc: 'Sequence and class diagrams' },
+      { id: 'hld', label: 'HLD', desc: 'System architecture diagram' },
+      { id: 'api', label: 'API Docs', desc: 'Six REST endpoints with JSON' },
+      { id: 'db', label: 'Database', desc: 'Tables, keys and ER relations' },
+      { id: 'scale', label: 'Scalability', desc: 'Eight scale and reliability cards' }
+    ].map((t) => ({ ...t, go: go(t.id), st: 'padding:8px 16px;border-radius:999px;font-weight:600;font-size:13px;border:1px solid ' + (s.tab === t.id ? 'transparent;background:linear-gradient(135deg,#7c3aed,#db2777);color:#fff' : 'var(--line);background:transparent;color:var(--text)') }));
+    const J = (o) => JSON.stringify(o, null, 2);
+    const mk = (method, path, title, req, res, codes) => ({ method, path, title, req, res, codes });
+    const apis = [
+      mk('POST', '/api/media', 'Upload Media', J({ type: 'video', mimeType: 'video/mp4', sizeBytes: 8421000, caption: 'Sunset', file: 'multipart' }), J({ mediaId: 'm_981', status: 'PROCESSING', url: 'https://cdn.example.com/m_981' }), '201 Created · 400 Invalid file · 401 Unauthorized · 413 Too large · 415 Unsupported type · 429 Rate limited'),
+      mk('GET', '/api/posts/{id}', 'Get Post Details', 'GET /api/posts/p_501', J({ id: 'p_501', author: { id: 'u_7', name: 'asha' }, media: [{ id: 'm_981', url: 'https://cdn.example.com/m_981' }], likeCount: 128, commentCount: 9, likedByMe: false }), '200 OK · 401 Unauthorized · 404 Not found'),
+      mk('POST', '/api/users/{id}/follow', 'Follow User', 'POST /api/users/u_12/follow', J({ followerId: 'u_7', followeeId: 'u_12', status: 'FOLLOWING' }), '200 Already following · 201 Created · 401 Unauthorized · 404 User not found · 409 Cannot follow self'),
+      mk('POST', '/api/posts/{id}/like', 'Like Post', 'POST /api/posts/p_501/like', J({ postId: 'p_501', liked: true, likeCount: 129 }), '200 OK (idempotent) · 401 Unauthorized · 404 Post not found'),
+      mk('POST', '/api/posts/{id}/comments', 'Add Comment', J({ text: 'Great shot!' }), J({ commentId: 'c_33', postId: 'p_501', userId: 'u_7', text: 'Great shot!', createdAt: '2026-10-12T09:30:00Z' }), '201 Created · 400 Empty text · 401 Unauthorized · 404 Post not found · 429 Rate limited'),
+      mk('GET', '/api/feed', 'Get Feed (cursor pagination)', 'GET /api/feed?limit=20&cursor=eyJ0IjoxNzYw', J({ items: [{ postId: 'p_501', authorId: 'u_12', mediaUrl: 'https://cdn.example.com/m_981' }], nextCursor: 'eyJ0IjoxNzU5' }), '200 OK · 401 Unauthorized · 429 Rate limited')
+    ].map((a, i) => ({
+      ...a, open: !!s.open['api' + i], arrow: s.open['api' + i] ? 'Collapse' : 'Expand', toggle: tg('api' + i),
+      badge: 'padding:4px 10px;border-radius:8px;color:#fff;font-weight:800;font-size:12px;background:' + (a.method === 'GET' ? '#2563eb' : '#db2777'),
+      copyPath: cp(a.method + ' ' + a.path), copyReq: cp(a.req), copyRes: cp(a.res)
+    }));
+    const actors = ['User', 'Mobile App', 'API Gateway', 'Media Service', 'Object Storage', 'Database'].map((name, i) => ({ name, c: ['#7c3aed', '#9333ea', '#db2777', '#be185d', '#2563eb', '#1d4ed8'][i] }));
+    const raw = [[0, 1, 'Pick photo / video'], [1, 2, 'POST /api/media + JWT'], [2, 3, 'Auth, rate limit, route'], [3, 3, 'Validate type, size, MIME'], [3, 4, 'PUT object'], [4, 3, 'Object key'], [3, 5, 'INSERT media + post'], [5, 3, 'Row ids'], [3, 1, '201 Created (via gateway)'], [1, 0, 'Post published']];
+    const steps = raw.map(([a, b, label], i) => {
+      const lo = Math.min(a, b), span = Math.abs(a - b) + 1, self = a === b, back = b < a;
+      return { n: i + 1, label, gc: 'grid-column:' + (lo + 1) + ' / span ' + span, mg: 'margin:0 ' + (50 / span) + '%',
+        line: 'display:' + (self ? 'none' : 'flex') + ';align-items:center;flex-direction:' + (back ? 'row-reverse' : 'row'),
+        col: back ? '#2563eb' : '#7c3aed', head: back ? '◀' : '▶' };
+    });
+    const classes = [
+      { name: 'User', attrs: '- id: UUID\n- username: String\n- email: String\n- passwordHash: String\n- createdAt: Instant', methods: '+ follow(User)\n+ unfollow(User)\n+ createPost(Media)\n+ getFeed(cursor)' },
+      { name: 'Post', attrs: '- id: UUID\n- authorId: UUID\n- caption: String\n- status: PostStatus\n- createdAt: Instant', methods: '+ publish()\n+ addComment(Comment)\n+ like(User)\n+ delete()' },
+      { name: 'Media', attrs: '- id: UUID\n- postId: UUID\n- type: PHOTO | VIDEO\n- objectKey: String\n- thumbnailKey: String\n- durationSec: int', methods: '+ validate()\n+ upload()\n+ getCdnUrl()' },
+      { name: 'Comment', attrs: '- id: UUID\n- postId: UUID\n- userId: UUID\n- text: String\n- createdAt: Instant', methods: '+ edit(text)\n+ delete()' },
+      { name: 'Like', attrs: '- postId: UUID\n- userId: UUID\n- createdAt: Instant', methods: '+ create()\n+ remove()' }
+    ];
+    const rels = [
+      { a: 'User', m: '1 ──── *', b: 'Post', t: 'Composition: a user authors many posts' },
+      { a: 'Post', m: '1 ◆─── 1..10', b: 'Media', t: 'Composition: a post owns its media items' },
+      { a: 'Post', m: '1 ──── *', b: 'Comment', t: 'Composition: comments die with the post' },
+      { a: 'Post', m: '1 ──── *', b: 'Like', t: 'Aggregation: one like per user per post' },
+      { a: 'User', m: '1 ──── *', b: 'Comment', t: 'Association: a user writes comments' },
+      { a: 'User', m: '* ──── *', b: 'User', t: 'Self association: follows (Followers table)' }
+    ];
+    const tables = [
+      { name: 'users', cols: 'PK  id            uuid\nUQ  username      varchar\nUQ  email         varchar\n    password_hash varchar\n    bio           text\n    created_at    timestamptz' },
+      { name: 'posts', cols: 'PK  id          uuid\nFK  user_id     uuid -> users.id\n    caption     text\n    status      enum\n    created_at  timestamptz' },
+      { name: 'media', cols: 'PK  id            uuid\nFK  post_id       uuid -> posts.id\n    type          enum(photo,video)\n    object_key    varchar\n    thumbnail_key varchar\n    size_bytes    bigint' },
+      { name: 'followers', cols: 'PK,FK follower_id uuid -> users.id\nPK,FK followee_id uuid -> users.id\n      created_at  timestamptz' },
+      { name: 'likes', cols: 'PK,FK post_id    uuid -> posts.id\nPK,FK user_id    uuid -> users.id\n      created_at timestamptz' },
+      { name: 'comments', cols: 'PK  id          uuid\nFK  post_id     uuid -> posts.id\nFK  user_id     uuid -> users.id\n    text        text\n    created_at  timestamptz' }
+    ];
+    const erRels = [
+      { a: 'users', m: '1 ──< *', b: 'posts', t: 'posts.user_id -> users.id' },
+      { a: 'posts', m: '1 ──< *', b: 'media', t: 'media.post_id -> posts.id' },
+      { a: 'users', m: '* >──< *', b: 'users', t: 'via followers (follower_id, followee_id)' },
+      { a: 'users', m: '* >──< *', b: 'posts', t: 'via likes (user_id, post_id)' },
+      { a: 'posts', m: '1 ──< *', b: 'comments', t: 'comments.post_id -> posts.id' },
+      { a: 'users', m: '1 ──< *', b: 'comments', t: 'comments.user_id -> users.id' }
+    ];
+    const D = {
+      client: ['Mobile / Web Client', 'Uploads media, renders feed. Sends HTTPS requests with a JWT; fetches media directly from the CDN.'],
+      lb: ['Load Balancer', 'Layer 7 balancer distributing traffic across gateway instances, with health checks and TLS termination.'],
+      gw: ['API Gateway', 'Single entry point: authentication, rate limiting, request routing and metrics. Calls the microservices below.'],
+      user: ['User Service', 'Profiles, follow graph. Reads and writes PostgreSQL; caches profiles in Redis.'],
+      post: ['Post Service', 'Creates and serves posts. Publishes post.created events to Kafka for feed fan-out.'],
+      media: ['Media Upload Service', 'Validates files, stores originals in object storage, writes metadata, emits media.uploaded to Kafka.'],
+      feed: ['Feed Service', 'Builds personalized feeds: fan-out on write for normal users, fan-in on read for celebrities. Feed lists live in Redis.'],
+      lc: ['Like and Comment Service', 'Handles likes and comments, updates counters in Redis, flushes to PostgreSQL asynchronously.'],
+      notif: ['Notification Service', 'Consumes Kafka events and sends push, email and in-app notifications for likes, comments and follows.'],
+      pg: ['PostgreSQL', 'Primary store for structured data. One primary plus read replicas, sharded by user_id as data grows.'],
+      obj: ['Object Storage', 'Durable storage for originals, transcoded renditions and thumbnails. Fronted by the CDN.'],
+      redis: ['Redis Cache', 'Caches feeds, hot posts, profiles and counters with TTLs and cache-aside reads.'],
+      mq: ['Kafka / RabbitMQ', 'Async backbone. Decouples uploads from transcoding, feed fan-out and notifications; retries and dead-letter queues.'],
+      cdn: ['CDN', 'Edge caches serve photos and video segments close to users, offloading object storage.'],
+      work: ['Background Workers', 'Consume queue jobs: video transcoding to multiple bitrates and thumbnail generation, then update media status.']
+    };
+    const item = (id, col, arrow) => ({ id, name: D[id][0], arrow, pick: () => this.setState({ sel: id }),
+      st: 'padding:12px 16px;border-radius:12px;font-weight:600;font-size:13px;cursor:pointer;min-width:200px;border:2px solid ' + col + ';' + (s.sel === id ? 'background:' + col + ';color:#fff' : 'background:var(--card);color:var(--text)') });
+    const edge = [item('client', '#7c3aed', 'HTTPS'), item('lb', '#7c3aed', 'round-robin'), item('gw', '#7c3aed', 'REST · gRPC to services')];
+    const services = ['user', 'post', 'media', 'feed', 'lc', 'notif'].map((id) => item(id, '#db2777'));
+    const infra = ['pg', 'redis', 'mq', 'obj', 'cdn', 'work'].map((id) => item(id, '#2563eb'));
+    const sc = [
+      ['Load balancing', 'L7 balancers spread requests across stateless gateway and service instances.', 'Health checks remove bad nodes within seconds. Multiple balancers across availability zones remove the single point of failure. Least-connections routing smooths uneven load.'],
+      ['Indexing and read replicas', 'Composite indexes and replicas keep reads fast.', 'Writes go to the primary; feed, profile and comment reads go to replicas. Indexes on (user_id, created_at) serve timelines. Shard by user_id once a single primary saturates.'],
+      ['Redis caching', 'Cache feeds, hot posts and counters in memory.', 'Cache-aside with TTL for profiles and posts. Feed lists stored as sorted sets. Like counters incremented in Redis and flushed to PostgreSQL in batches.'],
+      ['Horizontal scaling', 'Stateless services scale out by adding instances.', 'Autoscaling on CPU and request rate. Sessions use JWT so no server affinity is needed. Each microservice scales independently, for example Feed Service during evening peaks.'],
+      ['CDN media delivery', 'Photos and video segments are served from the edge.', 'Immutable object keys allow long cache lifetimes. Adaptive bitrate renditions are chosen per device. Origin traffic stays small even with millions of viewers.'],
+      ['Queues and background work', 'Heavy work leaves the request path.', 'Uploads return quickly while workers transcode video and make thumbnails. Fan-out and notifications consume Kafka topics. Consumers scale with partitions.'],
+      ['Rate limiting and authentication', 'JWT auth and per-user limits protect the platform.', 'Gateway validates tokens, applies token-bucket limits per user and IP, and returns 429 with Retry-After. Uploads get stricter limits than reads.'],
+      ['Monitoring, retries, fault tolerance', 'Observe everything and fail gracefully.', 'Metrics, logs and traces with alerts on latency and error rate. Exponential backoff retries, idempotent writes, circuit breakers, dead-letter queues, multi-AZ replication and automatic DB failover.']
+    ].map(([title, short, more], i) => ({ title, short, more, open: !!s.open['s' + i], arrow: s.open['s' + i] ? '−' : '+', toggle: tg('s' + i) }));
+    const sd = D[s.sel];
+    return {
+      root: th + ';min-height:100%;background:var(--bg);color:var(--text);font-family:"Plus Jakarta Sans",system-ui,sans-serif',
+      tabs, apis, actors, steps, classes, rels, tables, erRels, edge, services, infra, scale: sc,
+      sel: { name: sd[0], desc: sd[1] },
+      isHome: s.tab === 'home', isApi: s.tab === 'api', isLld: s.tab === 'lld', isDb: s.tab === 'db', isHld: s.tab === 'hld', isScale: s.tab === 'scale',
+      goLld: go('lld'), goHld: go('hld'),
+      print: () => { try { window.print(); } catch (e) {} },
+      toggleDark: () => this.setState({ dark: !s.dark }),
+      modeLabel: s.dark ? 'Light mode' : 'Dark mode',
+      card: 'background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px',
+      h1: 'margin:0 0 6px;font-size:32px;font-weight:800;color:var(--text)',
+      h2: 'margin:0 0 8px;font-size:18px;font-weight:800;color:var(--text)',
+      p: 'margin:6px 0 0;font-size:14px;line-height:1.65;color:var(--mute)',
+      lbl: 'font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--mute);margin-bottom:6px',
+      pre: 'margin:0;padding:14px;border-radius:12px;background:#1e1b2e;color:#e9e4ff;font-family:"JetBrains Mono",monospace;font-size:12px;line-height:1.55;overflow-x:auto;white-space:pre',
+      umlPre: 'margin:0;padding:10px 12px;font-family:"JetBrains Mono",monospace;font-size:12px;line-height:1.6;color:var(--text);overflow-x:auto',
+      btn: 'padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-weight:600;font-size:12px'
+    };
+  }
+}
+</script>
+</body>
+</html>
